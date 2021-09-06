@@ -20,7 +20,7 @@ namespace WorkshopAzureFunction.Functions.Functions
         [FunctionName(nameof(CreateInput))]
         public static async Task<IActionResult> CreateInput(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "TimesEmployees")] HttpRequest req,
-            [Table("TimesEmployees", Connection = "AzureWebJobsStorage")] CloudTable todoTable,
+            [Table("TimesEmployees", Connection = "AzureWebJobsStorage")] CloudTable timeTable,
             ILogger log)
         {
             log.LogInformation("Recieved a new register");
@@ -29,14 +29,15 @@ namespace WorkshopAzureFunction.Functions.Functions
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             TimesEmployees timeEmployee = JsonConvert.DeserializeObject<TimesEmployees>(requestBody);
 
-            if (string.IsNullOrEmpty(timeEmployee?.IdEmployee.ToString()))
+            if (timeEmployee?.IdEmployee == 0)
             {
-                return new BadRequestObjectResult(new Response { IsSuccess = false, Message = "the request must have  a IdEmployee." });
+                return new BadRequestObjectResult(new Response { IsSuccess = false, Message = "the request must have  a IdEmployee different of 0." });
             }
 
+            
              TimesEmployeesEntity timeEmployeEntity = new TimesEmployeesEntity
             {
-                DateInputOutput = DateTime.UtcNow,
+                DateInputOutput = timeEmployee.DateInputOutput,
                 ETag = "*",
                 Consolidated = false,
                 Type = timeEmployee.Type,
@@ -47,7 +48,7 @@ namespace WorkshopAzureFunction.Functions.Functions
 
 
             TableOperation addOperation = TableOperation.Insert(timeEmployeEntity);
-            await todoTable.ExecuteAsync(addOperation);
+            await timeTable.ExecuteAsync(addOperation);
 
             string message = "New Register stored in table";
             log.LogInformation(message);
@@ -67,7 +68,7 @@ namespace WorkshopAzureFunction.Functions.Functions
         [FunctionName(nameof(UpdateInput))]
         public static async Task<IActionResult> UpdateInput(
            [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "TimesEmployees/{id}")] HttpRequest req,
-           [Table("TimesEmployees", Connection = "AzureWebJobsStorage")] CloudTable todoTable,
+           [Table("TimesEmployees", Connection = "AzureWebJobsStorage")] CloudTable timeTable,
            string id,
            ILogger log)
         {
@@ -79,7 +80,7 @@ namespace WorkshopAzureFunction.Functions.Functions
 
             //Validate input id
             TableOperation findOperation = TableOperation.Retrieve<TimesEmployeesEntity>("TIMESEMPLOYEES", id);
-            TableResult findResult = await todoTable.ExecuteAsync(findOperation);
+            TableResult findResult = await timeTable.ExecuteAsync(findOperation);
 
             if (findResult.Result == null)
             {
@@ -93,15 +94,17 @@ namespace WorkshopAzureFunction.Functions.Functions
 
             //Update input
             TimesEmployeesEntity timeEmployeeEntity = (TimesEmployeesEntity)findResult.Result;
-            timeEmployeeEntity.Type = timeEmployee.Type;
+            
             if (!string.IsNullOrEmpty(timeEmployee.IdEmployee.ToString()))
             {
                 timeEmployeeEntity.IdEmployee = timeEmployee.IdEmployee;
+                timeEmployeeEntity.Type = timeEmployee.Type;
+                timeEmployeeEntity.DateInputOutput = timeEmployee.DateInputOutput;
             }
 
 
             TableOperation addOperation = TableOperation.Replace(timeEmployeeEntity);
-            await todoTable.ExecuteAsync(addOperation);
+            await timeTable.ExecuteAsync(addOperation);
 
             string message = $"Register: {id}, update in table.";
             log.LogInformation(message);
@@ -123,13 +126,13 @@ namespace WorkshopAzureFunction.Functions.Functions
         [FunctionName(nameof(GetAllRegisters))]
         public static async Task<IActionResult> GetAllRegisters(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "TimesEmployees")] HttpRequest req,
-        [Table("TimesEmployees", Connection = "AzureWebJobsStorage")] CloudTable todoTable,
+        [Table("TimesEmployees", Connection = "AzureWebJobsStorage")] CloudTable timeTable,
         ILogger log)
         {
             log.LogInformation("Get all registers received.");
 
             TableQuery<TimesEmployeesEntity> query = new TableQuery<TimesEmployeesEntity>();
-            TableQuerySegment<TimesEmployeesEntity> todos = await todoTable.ExecuteQuerySegmentedAsync(query, null);
+            TableQuerySegment<TimesEmployeesEntity> todos = await timeTable.ExecuteQuerySegmentedAsync(query, null);
 
             string message = "Retrieve all registers.";
             log.LogInformation(message);
@@ -179,7 +182,7 @@ namespace WorkshopAzureFunction.Functions.Functions
         public static async Task<IActionResult> DeleteRegister(
             [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "TimesEmployees/{id}")] HttpRequest req,
             [Table("TimesEmployees", "TIMESEMPLOYEES", "{id}")] TimesEmployeesEntity timeEmployeeEntity,
-            [Table("TimesEmployees", Connection = "AzureWebJobsStorage")] CloudTable todoTable,
+            [Table("TimesEmployees", Connection = "AzureWebJobsStorage")] CloudTable timeTable,
             ILogger log)
         {
             if (timeEmployeeEntity == null)
@@ -192,7 +195,7 @@ namespace WorkshopAzureFunction.Functions.Functions
             }
 
             log.LogInformation($"Delete for register: {timeEmployeeEntity.RowKey}, received.");
-            await todoTable.ExecuteAsync(TableOperation.Delete(timeEmployeeEntity));
+            await timeTable.ExecuteAsync(TableOperation.Delete(timeEmployeeEntity));
 
             // Send response
             string message = $"Register: {timeEmployeeEntity.RowKey}, deleted.";

@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31613.86
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkshopAzureFunction.Common", "WorkshopAzureFunction.Common\WorkshopAzureFunction.Common.csproj", "{04B4FFE9-0CEA-43D1-85BE-2CAAF755ADD5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkshopAzureFunction.Common", "WorkshopAzureFunction.Common\WorkshopAzureFunction.Common.csproj", "{04B4FFE9-0CEA-43D1-85BE-2CAAF755ADD5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkshopAzureFunction.Functions", "WorkshopAzureFunction.Functions\WorkshopAzureFunction.Functions.csproj", "{13E7E5F6-5AA3-4C57-9918-E511C747E420}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkshopAzureFunction.Functions", "WorkshopAzureFunction.Functions\WorkshopAzureFunction.Functions.csproj", "{13E7E5F6-5AA3-4C57-9918-E511C747E420}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkshopAzureFunction.Test", "WorkshopAzureFunction.Test\WorkshopAzureFunction.Test.csproj", "{5AF7B6B3-D02D-4943-8874-40034C28EF0D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkshopAzureFunction.Test", "WorkshopAzureFunction.Test\WorkshopAzureFunction.Test.csproj", "{5AF7B6B3-D02D-4943-8874-40034C28EF0D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
