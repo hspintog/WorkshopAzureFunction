@@ -211,5 +211,31 @@ namespace WorkshopAzureFunction.Functions.Functions
 
 
 
+        [FunctionName(nameof(GetConsolidatedDate))]
+        public static async Task<IActionResult> GetConsolidatedDate(
+       [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "ConsolidatedEmployees/{date}")] HttpRequest req,
+       [Table("ConsolidatedEmployes", Connection = "AzureWebJobsStorage")] CloudTable consolidatedTable,
+       string date,
+       ILogger log)
+        {
+            log.LogInformation("Get all consolidated employees received.");
+
+            string filter = TableQuery.GenerateFilterConditionForDate("Date", QueryComparisons.Equal, Convert.ToDateTime(date));
+            TableQuery<ConsolidatedEntity> query = new TableQuery<ConsolidatedEntity>().Where(filter);
+            TableQuerySegment<ConsolidatedEntity> todos = await consolidatedTable.ExecuteQuerySegmentedAsync(query, null);
+
+            string message = "Retrieve all consolidated employees.";
+            log.LogInformation(message);
+
+            return new OkObjectResult(new Response
+            {
+                IsSuccess = true,
+                Message = message,
+                Result = todos
+            });
+        }
+
+
+
     }
 }
