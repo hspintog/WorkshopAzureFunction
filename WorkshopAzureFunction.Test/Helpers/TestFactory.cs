@@ -18,11 +18,25 @@ namespace WorkshopAzureFunction.Test.Helpers
         {
             return new TimesEmployeesEntity
             {
-                DateInputOutput = DateTime.Now,
+                DateInputOutput = Convert.ToDateTime("2021-09-06"),
                 ETag = "*",
                 Consolidated = false,
                 Type = 0,
                 PartitionKey = "TIMESEMPLOYEES",
+                RowKey = Guid.NewGuid().ToString(),
+                IdEmployee = 999
+            };
+        }
+
+
+        public static ConsolidatedEntity GetConsolidatedEntity()
+        {
+            return new ConsolidatedEntity
+            {
+                Date =  Convert.ToDateTime("2021-09-06"),
+                ETag = "*",
+                MinutesWorked = 150,
+                PartitionKey = "TIMESCONSOLIDATEDEMPLOYEES",
                 RowKey = Guid.NewGuid().ToString(),
                 IdEmployee = 999
             };

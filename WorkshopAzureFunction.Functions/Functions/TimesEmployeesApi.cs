@@ -148,31 +148,37 @@ namespace WorkshopAzureFunction.Functions.Functions
 
 
         [FunctionName(nameof(GetRegisterById))]
-        public static IActionResult GetRegisterById(
+        public static async Task<IActionResult> GetRegisterById(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "TimesEmployees/{id}")] HttpRequest req,
-        [Table("TimesEmployees", "TIMESEMPLOYEES", "{id}")] TimesEmployeesEntity timeEmployeeEntity,
+        [Table("TimesEmployees", Connection = "AzureWebJobsStorage")] CloudTable timeTable,
+        string id,
         ILogger log)
         {
-            if (timeEmployeeEntity == null)
+            
+                       
+            log.LogInformation($"Get for register: {id}, received.");
+
+            string filter = TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, id);
+            TableQuery<TimesEmployeesEntity> query = new TableQuery<TimesEmployeesEntity>().Where(filter);
+            TableQuerySegment<TimesEmployeesEntity> todos = await timeTable.ExecuteQuerySegmentedAsync(query, null);
+
+            if (todos.Results == null || todos.Results.Count <= 0)
             {
                 return new NotFoundObjectResult(new Response
                 {
                     IsSuccess = false,
-                    Message = "Register not found."
+                    Message = $"Register {id}, not found."
                 });
             }
 
-            log.LogInformation($"Get for register: {timeEmployeeEntity.RowKey}, received.");
-
-            // Send response
-            string message = $"Register: {timeEmployeeEntity.RowKey}, retrieved.";
+            string message = $"Retrieve  employees: {id}, found.";
             log.LogInformation(message);
 
             return new OkObjectResult(new Response
             {
                 IsSuccess = true,
                 Message = message,
-                Result = timeEmployeeEntity
+                Result = todos
             });
         }
 

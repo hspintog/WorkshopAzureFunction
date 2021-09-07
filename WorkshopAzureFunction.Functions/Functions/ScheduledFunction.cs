@@ -23,7 +23,7 @@ namespace WorkshopAzureFunction.Functions.Functions
             [Table("ConsolidatedEmployes", Connection = "AzureWebJobsStorage")] CloudTable consolidatedTable,
             ILogger log)
         {
-            log.LogInformation($"Deleting completed function executed at: {DateTime.Now}");
+            
             string filter = TableQuery.GenerateFilterConditionForBool("Consolidated", QueryComparisons.Equal, false);
 
             TableQuery<TimesEmployeesEntity> query = new TableQuery<TimesEmployeesEntity>().Where(filter);
